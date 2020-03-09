@@ -9,6 +9,7 @@ nmfFinalModel <- function() {
   all <- all[,c('s', 'd', 'y')]
   colnames(all) <- c("Student", "Professor", "Rating")
   nrow(all)
+  head(all)
   # Get sample size, which is 95% of all the data
   smp_size <- floor(0.95 * nrow(all))
   
