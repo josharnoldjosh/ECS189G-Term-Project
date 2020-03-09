@@ -51,6 +51,6 @@ train_test_split <- function(data, test_ratio=0.3) {
 init <- function() {
   library(rectools)
   datasets <- load_data(is_y_last = FALSE)
-  formUserData(datasets$SongList, fileOut = "SongListUserData")
-  formUserData(datasets$InstEval, fileOut = "InstEvalUserData")
+  formUserData(datasets$InstEval[, 1:3], fileOut = "InstEvalUserData")
+  #formUserData(datasets$SongList, fileOut = "SongListUserData") # uncomment me if file don't exist
 }
