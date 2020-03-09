@@ -1,20 +1,29 @@
 embedMeans <- function(data) {
   library(rectools)
+  
   if (!all(names(data)[1:3] == c("UserID", "ItemID", "rating"))) {
-    stop("Make sure y/ratings isn't last column when embedding means.")
+    stop("Make sure 'is_y_last=FALSE' when calling 'load_data'")
   }
   
-  # Get user data
-  user_data <- formUserData(data)
-  
-  # Update matrix
-  f <- function(x) {
-    return (mean(user_data[[as.integer(x)]]$ratings))
+  embedData <- function (data, path) {
+    load(path)
+    ie_form <- retval
+    
+    f <- function(x) {
+      return (mean(user_data[[as.integer(x)]]$ratings))
+    }
+    
+    data$UserID <- sapply(data$UserID, f)
+    data$ItemID <- NULL
+    names(data)[1] <- "EmbeddedUserID"
+    return (data)
   }
   
-  data$ItemID <- NULL
-  data$UserID <- sapply(data$UserID, f)
-  return (data)
+  if (nrow(data) == 73421) {
+    return (embedData(data, './user_data/ie.RData'))
+  }else{
+    return (embedData(data, './user_data/song.RData'))
+  }
 }
 
 # This function loads data into memory
@@ -26,7 +35,7 @@ load_data <- function(is_y_last=F) {
     InstEval <- InstEval[, c("UserID", "ItemID", "rating", "studage", "lectage", "service", "dept")]
   }
   # Convert factors to dummies... ?
-  SongList <- read.csv(file = 'songsDataset.csv')
+  SongList <- read.csv(file = './data/songsDataset.csv')
   names(SongList) <- c("UserID", "ItemID", "rating")
   datasets <- list()
   datasets$InstEval <- InstEval
@@ -51,6 +60,6 @@ train_test_split <- function(data, test_ratio=0.3) {
 init <- function() {
   library(rectools)
   datasets <- load_data(is_y_last = FALSE)
-  formUserData(datasets$InstEval[, 1:3], fileOut = "InstEvalUserData")
-  #formUserData(datasets$SongList, fileOut = "SongListUserData") # uncomment me if file don't exist
+  formUserData(datasets$InstEval[, 1:3], fileOut = "./user_data/ie.RData")
+  formUserData(datasets$SongList[,1:3], fileOut = "./user_data/song.RData")
 }
