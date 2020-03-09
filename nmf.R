@@ -1,13 +1,14 @@
-nmfFinalModel <- function(data_name.tst) {
+nmfFinalModel <- function() {
   library(recosystem)
-  # Template nmf model used as a basis to create other nmf models
-  
-  # Extract data from the GroupLens 100k dataset
-  all <- data_name.tst
+  library(lme4)
+  library(Matrix)
+  data(InstEval)
+  all <- InstEval
   
   # TODO: Clean the data
-  # all <- all[,c('usernum', 'movienum', 'rating')]
-  
+  all <- all[,c('s', 'd', 'y')]
+  colnames(all) <- c("Student", "Professor", "Rating")
+  nrow(all)
   # Get sample size, which is 95% of all the data
   smp_size <- floor(0.95 * nrow(all))
   
@@ -22,10 +23,11 @@ nmfFinalModel <- function(data_name.tst) {
   test_data <- all[-train_ind, ] #5% of all data
   
   # TODO: need to create an object of class 'DataSource', specifying which
-  # columns are user IDs, item IDs, and ratings for training and test set
-  # all.trn <- (data_memory(train_data$usernum, train_data$movienum, train_data$rating, index1 = TRUE))
-  # all.tst <- (data_memory(test_data$usernum, test_data$movienum, test_data$rating, index1 = TRUE))
+  # columns are Student IDs, Professor IDs, and Ratings for training and test set
+  all.trn <- (data_memory(train_data$Student, train_data$Professor, train_data$Rating, index1 = TRUE))
+  all.tst <- (data_memory(train_data$Student, train_data$Professor, train_data$Rating, index1 = TRUE))
   
+  head(all.trn)
   # recosystem package actions takes place within r
   r <- Reco()
   
@@ -42,11 +44,10 @@ nmfFinalModel <- function(data_name.tst) {
   # save(W, H, file = "WH.RData")
   
   # W and H matrices are here
-  WH <- load("WH.RData")
+  WH <- load(InstEval)
   
   # Returns a predict.txt file with all 5000 predictions
   preds <- r$predict(all.tst)
-  
   # Calculate MAPE - returns NaN
   # mape <- mean(abs((test_data$rating - preds) / test_data$rating)) * 100
   # cat("Mean Absolute Percentage Error:", mape, "\n")
