@@ -10,13 +10,12 @@ embedMeans <- function(data) {
   embedData <- function (data, path) {
     load(path)
     ie_form <- retval
-    print(ie_form)
     
     f <- function(x) {
       return (mean(user_data[[as.integer(x)]]$ratings))
     }
     
-    data$UserID <- sapply(data$UserID, f)
+    data$UserID <- sapply(data$userID, f)
     data$ItemID <- NULL
     return (data)
   }
@@ -29,25 +28,25 @@ embedMeans <- function(data) {
 }
 
 # This function loads data into memory
-load_data <- function(is_y_last=F) {
+load_data <- function() {
   library(regtools)
-  
   library(lme4)
-  names(InstEval) <- c("userID", "itemID", "studage", "lectage", "service", "dept", "rating")
-  if (!is_y_last) {
-    InstEval <- InstEval[, c("userID", "itemID", "rating", "studage", "lectage", "service", "dept")]
-  }
   
-  # Convert factors to dummies... ?
-  # NOTE: We start the song list data from 1
+  InstEval <- InstEval[, c("userID", "itemID", "rating")]
+  
   SongList <- read.csv(file = './data/songsDataset.csv')
-  names(SongList) <- c("UserID", "ItemID", "rating")
-  SongList$UserID <- SongList$UserID + 1
+  names(SongList) <- c("userID", "itemID", "rating")
     
   datasets <- list()
   datasets$InstEval <- InstEval
   datasets$SongList <- SongList
   return (datasets)
+}
+
+# Ensure the dataset is standardized
+load_general_dataset <- function(data) {
+  data <- data[, c("userID", "itemID", "rating")]
+  return (data)
 }
 
 # Train test split

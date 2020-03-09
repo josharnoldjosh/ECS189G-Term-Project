@@ -12,4 +12,6 @@ custom_knn <- function(df, test, nc) {
 # Load data
 source('./data_loader.R')
 datasets <- load_data(is_y_last = FALSE)
-datasets$SongList <- embedMeans(datasets$SongList)
+head(datasets$InstEval)
+datasets$InstEval <- embedMeans(datasets$InstEval)
+head(datasets$InstEval)
