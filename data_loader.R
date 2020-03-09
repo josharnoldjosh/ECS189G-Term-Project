@@ -8,6 +8,7 @@ embedMeans <- function(data) {
   embedData <- function (data, path) {
     load(path)
     ie_form <- retval
+    print(ie_form)
     
     f <- function(x) {
       return (mean(user_data[[as.integer(x)]]$ratings))
@@ -28,15 +29,19 @@ embedMeans <- function(data) {
 
 # This function loads data into memory
 load_data <- function(is_y_last=F) {
-  library(lme4)
   library(regtools)
+  
+  library(lme4)
   names(InstEval) <- c("UserID", "ItemID", "studage", "lectage", "service", "dept", "rating")
   if (!is_y_last) {
     InstEval <- InstEval[, c("UserID", "ItemID", "rating", "studage", "lectage", "service", "dept")]
   }
+  
   # Convert factors to dummies... ?
   SongList <- read.csv(file = './data/songsDataset.csv')
   names(SongList) <- c("UserID", "ItemID", "rating")
+  SongList$UserID <- SongList$UserID + 1
+    
   datasets <- list()
   datasets$InstEval <- InstEval
   datasets$SongList <- SongList
