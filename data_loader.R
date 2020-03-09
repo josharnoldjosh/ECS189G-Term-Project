@@ -1,16 +1,14 @@
-is_formatted_correctly <- function(data) {
-  
-  # Check if first two columns are User ID and Item ID respectively
-  result <- names(data)[1:3] == c("user_id", "item_id", "y")
-  if (all(result)) {
-    return (TRUE)  
+# This function loads data into memory
+load_data <- function(y_is_last_column=FALSE) {
+  library(lme4)
+  names(InstEval) <- c("user_id", "item_id", "studage", "lectage", "service", "dept", "y")
+  if (!y_is_last_column) {
+    InstEval <- InstEval[, c("user_id", "item_id", "y", "studage", "lectage", "service", "dept")]
   }
-  
-  # Check if first two columns are User ID and Item ID respectively
-  result <- names(data)[1:3] == c("user_id", "item_id", "y")
-  if (all(result)) {
-    return (TRUE)  
-  }
-  
-  return (FALSE)
+  SongList <- read.csv(file = 'songsDataset.csv')
+  names(SongList) <- c("user_id", "item_id", "y")
+  datasets <- list()
+  datasets$InstEval <- InstEval
+  datasets$SongList <- SongList
+  return (datasets)
 }
