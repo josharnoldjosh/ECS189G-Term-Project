@@ -1,7 +1,9 @@
+
+# TODO: Maybe modify code to embed the item ID's too?
 embedMeans <- function(data) {
   library(rectools)
   
-  if (!all(names(data)[1:3] == c("UserID", "ItemID", "rating"))) {
+  if (!all(names(data)[1:3] == c("userID", "itemID", "rating"))) {
     stop("Make sure 'is_y_last=FALSE' when calling 'load_data'")
   }
   
@@ -16,7 +18,6 @@ embedMeans <- function(data) {
     
     data$UserID <- sapply(data$UserID, f)
     data$ItemID <- NULL
-    names(data)[1] <- "EmbeddedUserID"
     return (data)
   }
   
@@ -32,12 +33,13 @@ load_data <- function(is_y_last=F) {
   library(regtools)
   
   library(lme4)
-  names(InstEval) <- c("UserID", "ItemID", "studage", "lectage", "service", "dept", "rating")
+  names(InstEval) <- c("userID", "itemID", "studage", "lectage", "service", "dept", "rating")
   if (!is_y_last) {
-    InstEval <- InstEval[, c("UserID", "ItemID", "rating", "studage", "lectage", "service", "dept")]
+    InstEval <- InstEval[, c("userID", "itemID", "rating", "studage", "lectage", "service", "dept")]
   }
   
   # Convert factors to dummies... ?
+  # NOTE: We start the song list data from 1
   SongList <- read.csv(file = './data/songsDataset.csv')
   names(SongList) <- c("UserID", "ItemID", "rating")
   SongList$UserID <- SongList$UserID + 1
