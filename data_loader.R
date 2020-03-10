@@ -106,7 +106,7 @@ embedMeans <- function(data, cache='') {
 }
 
 # Converts to dummies & dataframe format
-dummify <- function(data, replace=0) {
+dummify <- function(data) {
   library(regtools)
   data <- factorsToDummies(data, omitLast=TRUE)
   data <- as.data.frame(data, omitLast=TRUE)
@@ -130,7 +130,7 @@ shuffle <- function(data) {
 # data is input data
 # k is the k-fold value, e.g 10
 # i is what fold we want, starting from 1 until 10
-k_fold <- function(data, k, i) {
+k_fold <- function(data, i, k=10) {
   folds <- cut(seq(1,nrow(data)),breaks=10,labels=FALSE)
   testIndexes <- which(folds==i, arr.ind=TRUE)
   testData <- data[testIndexes, ]
