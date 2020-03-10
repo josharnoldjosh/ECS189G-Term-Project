@@ -31,7 +31,7 @@ load_project_data <- function() {
 # Train test split with a ratio
 train_test_split <- function(data, test_ratio=0.3) {
   library(caret)
-  train.index <- createDataPartition(data$y, p = (1-test_ratio), list = FALSE)
+  train.index <- createDataPartition(data$rating, p = (1-test_ratio), list = FALSE)
   train <- data[ train.index,]
   test  <- data[-train.index,]
   result <- list()
@@ -41,13 +41,13 @@ train_test_split <- function(data, test_ratio=0.3) {
 }
 
 # TODO: Maybe modify code to embed the item ID's too?
-embedMeans <- function(dataset, cache='') {
+embedMeans <- function(data, cache='') {
   library(rectools)
   
   # Import Conversion
-  dataset$userID <- as.numeric(dataset$userID)
-  dataset$itemID <- as.numeric(dataset$itemID)
-  dataset$rating <- as.numeric(dataset$rating)
+  data$userID <- as.numeric(data$userID)
+  data$itemID <- as.numeric(data$itemID)
+  data$rating <- as.numeric(data$rating)
   
   # Check if empty cache
   if (cache == '') {
@@ -57,7 +57,7 @@ embedMeans <- function(dataset, cache='') {
   # Form user data
   path <- paste('./user_data/', cache, '.RData', sep='')
   if (!file.exists(path)) {
-    formUserData(dataset, fileOut = path)
+    formUserData(data, fileOut = path)
   }
   
   # Load user data
@@ -68,7 +68,16 @@ embedMeans <- function(dataset, cache='') {
     return (mean(user_data[[as.integer(user_id)]]$ratings))
   }
   
-  dataset$userID <- sapply(dataset$userID, embedUserID)
+  data$userID <- sapply(data$userID, embedUserID)
   
-  return (dataset)
+  return (data)
+}
+
+# Converts to dummies & dataframe format
+dummify <- function(data) {
+  library(regtools)
+  data <- factorsToDummies(data, omitLast=TRUE)
+  data <- as.data.frame(data, omitLast=TRUE)
+  data[is.na(data)] <- mean(data$rating)
+  return (data)
 }
