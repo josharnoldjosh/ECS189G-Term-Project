@@ -35,7 +35,7 @@ score <- function(split, y_hat) {
 
 # grid search -------
 
-upper_limit <- 10
+upper_limit <- 100
 nc_grid_search <- c(1:upper_limit)
 
 ie_history <- c()
@@ -54,7 +54,7 @@ for (nc in nc_grid_search) {
   print(nc)
   print(k_fold_score)
 }
-ie_df <- data.frame(c(1:upper_limit), ie_history, rep("InstEval", upper_limit))
+ie_df <- data.frame(c(1:upper_limit), ie_history, rep("InstEval (UserID + ItemID Embedding)", upper_limit))
 names(ie_df) <- c("x",'y', 'group')
 
 song_history <- c()
@@ -73,10 +73,10 @@ for (nc in nc_grid_search) {
   print(nc)
   print(k_fold_score)
 }
-song_df <- data.frame(c(1:upper_limit), song_history, rep("SongList", upper_limit))
+song_df <- data.frame(c(1:upper_limit), song_history, rep("SongList (UserID + ItemID Embedding)", upper_limit))
 names(song_df) <- c("x",'y', 'group')
 
 df <- rbind(ie_df, song_df)
 
 library(ggplot2)
-ggplot(data=df, aes(x=x, y=y, colour=group)) + geom_line() + geom_point()
+ggplot(data=df, aes(x=x, y=y, colour=group)) + geom_line() + geom_point() + ggtitle("Number of Clusters (Using 10-Fold Cross Validation) against MAPE")
