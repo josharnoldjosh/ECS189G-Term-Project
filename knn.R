@@ -1,6 +1,4 @@
-# KNN Function. Note, both x and y must have the EXACT SAME columns.
-# Just the number of rows changes.
-# Thus, we could split the data simply by rows and not even consider the rating or y value.
+# Our main KNN function
 knn <- function(df, test, nc) {
   library(regtools)
   x <- df[, 1:2] # Forcefully exclude y
@@ -14,22 +12,22 @@ knn <- function(df, test, nc) {
 source('./data_loader.R')
 datasets <- load_project_data()
 
-# Convert to numeric
-datasets$SongList <- numeric(datasets$SongList)
+# Convert to numeric (Only if we don't need factors)
+datasets$InstEval <- numeric(datasets$InstEval)
 
 # Embed means (Optional)
-datasets$SongList <- embedMeans(datasets$SongList, cache='song')
+datasets$InstEval <- embedMeans(datasets$InstEval, cache='ie')
 
 # Split data
-split <- train_test_split(datasets$SongList)
+split <- train_test_split(datasets$InstEval)
 
-# Get result
+# Pass through model & predict
 y_hat <- knn(ie_split$train, ie_split$test, 10)
 
-# Compare
+# Calculate MAPE
 y <- ie_split$test$rating
 score <- mean(abs(y - y_hat))
-print("MAPE: ", score)
+print(score)
 
 
 
