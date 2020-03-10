@@ -24,16 +24,31 @@ datasets <- load_project_data()
 # Embed means (Optional)
 datasets$InstEval <- embedMeans(datasets$InstEval, cache='ie')
 
-#datasets$InstEval$itemID <- NULL
+# Helper function
+score <- function(split, y_hat) {
+  source('./eval.R')
+  y <- split$test$rating
+  mape_result <- mape(y, y_hat)
+  return (mape_result)
+}
 
-# Split data
-split <- train_test_split(datasets$InstEval)
+nc_grid_search <- c(1:50)
+history <- c()
+for (nc in nc_grid_search) {
+  
+  # K Fold cross validation
+  k_fold_score <- 0
+  for (i in 1:10) {
+    split <- k_fold(datasets$InstEval, 10, i)
+    y_hat <- knn(split$train, split$test, nc)
+    k_fold_score <- k_fold_score + score(split, y_hat)
+  }
+  k_fold_score <- k_fold_score/10
+  history <- c(history, k_fold_score)
+  print("K Fold score")
+  print(nc)
+  print(k_fold_score)
+}
 
-# Pass through model & predict
-y_hat <- knn(split$train, split$test, 20)
+print(history)
 
-# Calculate MAPE
-source('./eval.R')
-y <- split$test$rating
-score <- mape(y, y_hat)
-print(score)

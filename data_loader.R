@@ -7,7 +7,7 @@ load_data <- function(data) {
   data$userID <- as.factor(data$userID)
   data$itemID <- as.factor(data$itemID)
   data$rating <- as.numeric(data$rating)
-  return (data)
+  return (shuffle(data))
 }
 
 # This function loads data into memory
@@ -123,12 +123,20 @@ numeric <- function(data) {
 
 # shuffles a dataset
 shuffle <- function(data) {
-  
+  data <- data[sample(nrow(data)),]
+  return (data)
 }
 
 # data is input data
 # k is the k-fold value, e.g 10
 # i is what fold we want, starting from 1 until 10
 k_fold <- function(data, k, i) {
-  
+  folds <- cut(seq(1,nrow(data)),breaks=10,labels=FALSE)
+  testIndexes <- which(folds==i, arr.ind=TRUE)
+  testData <- data[testIndexes, ]
+  trainData <- data[-testIndexes, ]
+  result <- list()
+  result$train <- trainData
+  result$test <- testData
+  return (result)
 }
