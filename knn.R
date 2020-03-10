@@ -37,4 +37,3 @@ source('./eval.R')
 y <- split$test$rating
 score <- mape(y, y_hat)
 print(score)
-
