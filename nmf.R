@@ -1,4 +1,5 @@
 nmfFinalModel <- function() {
+  # So far this is only for insteval, we can also change it to accomodate song dataset
   library(recosystem)
   library(lme4)
   library(Matrix)
@@ -10,6 +11,7 @@ nmfFinalModel <- function() {
   colnames(all) <- c("Student", "Professor", "Rating")
   nrow(all)
   head(all)
+  
   # Get sample size, which is 95% of all the data
   smp_size <- floor(0.95 * nrow(all))
   
@@ -28,7 +30,7 @@ nmfFinalModel <- function() {
   all.trn <- (data_memory(train_data$Student, train_data$Professor, train_data$Rating, index1 = TRUE))
   all.tst <- (data_memory(train_data$Student, train_data$Professor, train_data$Rating, index1 = TRUE))
   
-  head(all.trn)
+  #head(all.trn)
   # recosystem package actions takes place within r
   r <- Reco()
   
@@ -45,10 +47,11 @@ nmfFinalModel <- function() {
   # save(W, H, file = "WH.RData")
   
   # W and H matrices are here
-  WH <- load(InstEval)
+  #WH <- load(InstEval)
   
   # Returns a predict.txt file with all 5000 predictions
-  preds <- r$predict(all.tst)
+  preds <- r$predict(all.tst, out_memory())
+  print(preds)
   # Calculate MAPE - returns NaN
   # mape <- mean(abs((test_data$rating - preds) / test_data$rating)) * 100
   # cat("Mean Absolute Percentage Error:", mape, "\n")
