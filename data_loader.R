@@ -81,3 +81,11 @@ dummify <- function(data) {
   data[is.na(data)] <- mean(data$rating)
   return (data)
 }
+
+# Converts relevant columns to numeric
+numeric <- function(data) {
+  data$userID <- as.numeric(data$userID)
+  data$itemID <- as.numeric(data$itemID)
+  data$rating <- as.numeric(data$rating)
+  return (data)
+}
