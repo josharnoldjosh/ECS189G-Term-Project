@@ -1,10 +1,19 @@
 # Our main KNN function
 knn <- function(df, test, nc) {
   library(regtools)
-  x <- df[, 1:2] # Forcefully exclude y
+  
+  # Create X and y
+  x <- df 
   y <- df$rating
-  test <- test[, 1:2] # Forcefully exclude y from test
+  
+  # Remove y from X matrices
+  x$rating <- NULL
+  test$rating <- NULL
+  
+  # Pass through model
   result <- kNN(x, y, test, nc)
+  
+  # Return result
   return (result$regests)
 }
 
@@ -12,22 +21,20 @@ knn <- function(df, test, nc) {
 source('./data_loader.R')
 datasets <- load_project_data()
 
-# Convert to numeric (Only if we don't need factors)
-datasets$InstEval <- numeric(datasets$InstEval)
-
 # Embed means (Optional)
 datasets$InstEval <- embedMeans(datasets$InstEval, cache='ie')
+
+#datasets$InstEval$itemID <- NULL
 
 # Split data
 split <- train_test_split(datasets$InstEval)
 
 # Pass through model & predict
-y_hat <- knn(ie_split$train, ie_split$test, 10)
+y_hat <- knn(split$train, split$test, 20)
 
 # Calculate MAPE
-y <- ie_split$test$rating
-score <- mean(abs(y - y_hat))
+source('./eval.R')
+y <- split$test$rating
+score <- mape(y, y_hat)
 print(score)
-
-
 

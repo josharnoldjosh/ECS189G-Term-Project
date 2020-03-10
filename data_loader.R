@@ -3,6 +3,7 @@
 load_data <- function(data) {
   to_select <- c("userID", "itemID", "rating")
   data <- data[, to_select]
+  data[is.na(data)] <- mean(data$rating)
   data$userID <- as.factor(data$userID)
   data$itemID <- as.factor(data$itemID)
   data$rating <- as.numeric(data$rating)
@@ -45,9 +46,7 @@ embedMeans <- function(data, cache='') {
   library(rectools)
   
   # Import Conversion
-  data$userID <- as.numeric(data$userID)
-  data$itemID <- as.numeric(data$itemID)
-  data$rating <- as.numeric(data$rating)
+  data <- numeric(data)
   
   # Check if empty cache
   if (cache == '') {
@@ -74,11 +73,10 @@ embedMeans <- function(data, cache='') {
 }
 
 # Converts to dummies & dataframe format
-dummify <- function(data) {
+dummify <- function(data, replace=0) {
   library(regtools)
   data <- factorsToDummies(data, omitLast=TRUE)
   data <- as.data.frame(data, omitLast=TRUE)
-  data[is.na(data)] <- mean(data$rating)
   return (data)
 }
 
@@ -88,4 +86,16 @@ numeric <- function(data) {
   data$itemID <- as.numeric(data$itemID)
   data$rating <- as.numeric(data$rating)
   return (data)
+}
+
+# shuffles a dataset
+shuffle <- function(data) {
+  
+}
+
+# data is input data
+# k is the k-fold value, e.g 10
+# i is what fold we want, starting from 1 until 10
+k_fold <- function(data, k, i) {
+  
 }
