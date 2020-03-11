@@ -10,19 +10,25 @@ knn <- function(train, test, nc) {
   x_test$rating <- NULL
   
   # Fit
-  result <- kNN(x_train, y_train, x_test, nc)
+  knnout <- kNN(x_train, y_train, x_test, nc)
   
   # Calculate vectors of ratings
   f<-function(idx) {
     return(train[idx, ]$rating)
   }
-  rating_vec<- apply(result$whichClosest, 1, f)
+  rating_vec<- apply(knnout$whichClosest, 1, f)
   rating_vec <- t(rating_vec)
   
   # Calculate probs
   source('./eval.R')
   probs <- votes_to_prob(rating_vec)
   
+  # Create output
+  output <- "KNN Output Object"
+  
+  attributes(output)$probs <- probs
+  attributes(output)$y_hat <- round(knnout$regests)
+  
   # Return
-  return(probs)
+  return(output)
 }
