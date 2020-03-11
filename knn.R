@@ -1,22 +1,28 @@
-fit_knn <- function(train, nc) {
-  library(regtools)
+knn <- function(train, test, nc) {
   
-  # Define x & y
-  y<-train$rating
-  train$rating<-NULL
-  x<-preprocessx(train, nc)
+  # Load x & y
+  x_train<-train
+  x_train$rating <- NULL
+  y_train<-train$rating
   
-  # Fit the model
-  model<-knnest(y, x, nc)
+  # Load test
+  x_test<-test
+  x_test$rating <- NULL
   
-  # Return value
-  return(model)
-}
-
-pred_knn <- function(test, model) {
-  y_test<-test$rating
-  split$test$rating<-NULL
-  y_hat <- predict(result, as.matrix(split$test))
-  y_hat<-round(y_hat)
-  return (y_hat)
+  # Fit
+  result <- kNN(x_train, y_train, x_test, nc)
+  
+  # Calculate vectors of ratings
+  f<-function(idx) {
+    return(train[idx, ]$rating)
+  }
+  rating_vec<- apply(result$whichClosest, 1, f)
+  rating_vec <- t(rating_vec)
+  
+  # Calculate probs
+  source('./eval.R')
+  probs <- votes_to_prob(rating_vec)
+  
+  # Return
+  return(probs)
 }

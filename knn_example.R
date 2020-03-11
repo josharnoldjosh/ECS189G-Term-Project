@@ -12,13 +12,14 @@ datasets$InstEval <- embedMeans(datasets$InstEval, cache='ie')
 split <- train_test_split(datasets$InstEval)
 
 # Fit model
-model<-fit_knn(split$train, 100)
+probs <- knn(split$train, split$test, 5)
 
-# Predict y_hat
-y_hat<-pred_knn(split$test, model)
+print(probs[1, ])
 
 # Calculate MAPE
-score<-mape(split$test$rating, y_hat)
+#score<-mape(split$test$rating, y_hat)
 
 # Print
-score
+#score
+
+
