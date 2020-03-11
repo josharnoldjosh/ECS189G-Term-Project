@@ -3,6 +3,7 @@
 load_data <- function(data) {
   to_select <- c("userID", "itemID", "rating")
   data <- data[, to_select]
+  data<-shuffle(data) # shuffle data
   data[is.na(data)] <- mean(data$rating)
   data$userID <- as.factor(data$userID)
   data$itemID <- as.factor(data$itemID)

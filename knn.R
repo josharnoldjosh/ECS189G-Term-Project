@@ -1,87 +1,22 @@
-# Our main KNN function
-knn <- function(df, test, nc) {
+fit_knn <- function(train, nc) {
   library(regtools)
   
-  # Create X and y
-  x <- df 
-  y <- df$rating
+  # Define x & y
+  y<-train$rating
+  train$rating<-NULL
+  x<-preprocessx(train, nc)
   
-  # Remove y from X matrices
-  x$rating <- NULL
-  test$rating <- NULL
+  # Fit the model
+  model<-knnest(y, x, nc)
   
-  # Pass through model
-  result <- kNN(x, y, test, nc)
-  
-  # Return result
-  return (result$regests)
+  # Return value
+  return(model)
 }
 
-# Load data
-source('./data_loader.R')
-datasets <- load_project_data()
-datasets$InstEval <- embedMeans(datasets$InstEval, cache='ie')
-split <- train_test_split(datasets$InstEval)
-y_hat <- knn(split$train, split$test, 100)
-
-source('./eval.R')
-score<-mape(split$test$rating, y_hat)
-print(score)
-
-
-# grid search -------
-"
-# Helper function
-score <- function(split, y_hat) {
-  source('./eval.R')
-  y <- split$test$rating
-  mape_result <- mape(y, y_hat)
-  return (mape_result)
+pred_knn <- function(test, model) {
+  y_test<-test$rating
+  split$test$rating<-NULL
+  y_hat <- predict(result, as.matrix(split$test))
+  y_hat<-round(y_hat)
+  return (y_hat)
 }
-
-upper_limit <- 100
-nc_grid_search <- c(1:upper_limit)
-
-ie_history <- c()
-for (nc in nc_grid_search) {
-  
-  # K Fold cross validation
-  k_fold_score <- 0
-  for (i in 1:10) {
-    split <- k_fold(datasets$InstEval, i)
-    y_hat <- knn(split$train, split$test, nc)
-    k_fold_score <- k_fold_score + score(split, y_hat)
-  }
-  k_fold_score <- k_fold_score/10
-  ie_history <- c(ie_history, k_fold_score)
-  print('K Fold score')
-  print(nc)
-  print(k_fold_score)
-}
-ie_df <- data.frame(c(1:upper_limit), ie_history, rep('InstEval (UserID + ItemID Embedding)', upper_limit))
-names(ie_df) <- c('x','y', 'group')
-
-song_history <- c()
-for (nc in nc_grid_search) {
-  
-  # K Fold cross validation
-  k_fold_score <- 0
-  for (i in 1:10) {
-    split <- k_fold(datasets$SongList, 10, i)
-    y_hat <- knn(split$train, split$test, nc)
-    k_fold_score <- k_fold_score + score(split, y_hat)
-  }
-  k_fold_score <- k_fold_score/10
-  song_history <- c(song_history, k_fold_score)
-  print('K Fold score')
-  print(nc)
-  print(k_fold_score)
-}
-song_df <- data.frame(c(1:upper_limit), song_history, rep('SongList (UserID + ItemID Embedding)'', upper_limit))
-names(song_df) <- c('x','y', 'group')
-
-df <- rbind(ie_df, song_df)
-
-library(ggplot2)
-ggplot(data=df, aes(x=x, y=y, colour=group)) + geom_line() + geom_point() + ggtitle('Number of Clusters (Using 10-Fold Cross Validation) against MAPE')
-"
