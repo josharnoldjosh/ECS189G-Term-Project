@@ -14,6 +14,10 @@ split <- train_test_split(datasets$InstEval)
 # Fit model
 output <- knn(split$train, split$test, 50)
 
+# Probs
+probs <- attributes(output)$probs
+head(probs)
+
 # Output
 y_hat <- attributes(output)$y_hat
 

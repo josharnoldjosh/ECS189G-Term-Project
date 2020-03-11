@@ -32,7 +32,8 @@ votes_to_prob <- function(votes) {
   get_probs<-function(row) {
     counts <- get_counts(row)
     probs <- counts_to_prob(counts)
-    return (round(probs[2, ], digit=3))
+    probs <- round(probs[2, ], digit=3)
+    return (probs)
   }
   
   result<-apply(votes, 1, get_probs)
@@ -40,3 +41,20 @@ votes_to_prob <- function(votes) {
   return(result)
 }
 
+form_look_up_table <- function(test, rating_vec) {
+  
+  look_up_table <- cbind(test, votes_to_prob(rating_vec))
+  
+  "f <- function(row) {
+    probs <- row[c('1', '2', '3', '4', '5')]
+    user_id <- row['userID']
+    item_id <- row['itemID']
+    result<-list(userID=user_id, itemID=item_id, probs=probs)
+    d[[c(user_id, item_id)]] <- probs
+    return(result)
+  }
+  
+  apply(look_up_table, 1, f)"
+
+  return (look_up_table)
+}

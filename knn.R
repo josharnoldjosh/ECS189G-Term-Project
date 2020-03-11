@@ -21,12 +21,12 @@ knn <- function(train, test, nc) {
   
   # Calculate probs
   source('./eval.R')
-  probs <- votes_to_prob(rating_vec)
+  look_up <- form_look_up_table(x_test, rating_vec)
   
   # Create output
   output <- "KNN Output Object"
   
-  attributes(output)$probs <- probs
+  attributes(output)$probs <- look_up
   attributes(output)$y_hat <- round(knnout$regests)
   
   # Return
