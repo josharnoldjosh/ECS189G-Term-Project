@@ -57,60 +57,45 @@ predict.recProbs <- function(probsFitOut,newXs){
     return(preds)
 }
 
+#
+# This function predict the probability of ratings with glm models
+#
 logitPredict <- function(probsFitOut,newXs){
     preds<-NULL
     for(i in 1:probsFitOut$maxRating){
-        #print(i)
-        predglm<-predict(probsFitOut$glmList[[i]],newXs)
-        #print(predglm)
+        predglm<-predict(probsFitOut$glmList[[i]],newXs, type="response")
         preds<-cbind(preds,predglm)
     }
+    colnames(preds)<-c(1:probsFitOut$maxRating)
     return(preds)
 }
 
 #calculate the glm model
 #TODO 
-#1) how to use embedded dataset to glm?
-#2) it takes too much time to calculate glm model
-#3) there gonna be too much coefficients i.e. model gonna be overfitted
-#4) is it nonsense to use userID and itemID as covariates?
-#5) when glmcov = "all", the almost all of coefficience of itemID is NA
-#6) prediction is out of [0,1]
+#1) it takes too much time to calculate glm model
 ratingGlm <- function(dataIn,maxRating,embedMeans,specialArgs){
-    #print("logit called")
-    #print(dataIn)
-    if(embedMeans){
-        #initialize glm list
-        glmlist<-as.list(NULL)
-        #
-        # implement the glm for embedded dataset
-        # but how?
-        #
-    }else{
-        #initialize glm list
-        glmlist<-as.list(NULL)
-        for(i in 1:maxRating){
-            #make an dummy raing column
-            dummyrating<-as.integer(dataIn$rating==i)
+    #initialize glm list
+    glmlist<-as.list(NULL)
+    for(i in 1:maxRating){
+        #make an dummy raing column
+        dummyrating<-as.integer(dataIn$rating==i)
 
-            #make a dataset for glm
-            dataInDummy<-data.frame(dummyrating,dataIn[1:2])
+        #make a dataset for glm
+        dataInDummy<-data.frame(dummyrating,dataIn[1:2])
 
-            #print(dataInDummy)
+        #print(dataInDummy)
 
-            #make glm molel
-            glmout<-switch(specialArgs$glmcov,
-                "userID" = glm(dummyrating~userID,data=dataInDummy,family=binomial),
-                "itemID" = glm(dummyrating~itemID,data=dataInDummy,family=binomial),
-                "all" = glm(dummyrating~.,data=dataInDummy,family=binomial),
-                stop("Error: specialArgs$glmcov must be \"userID\" or \"itemID\" or \"all\"")
-            )
+        #make glm molel
+        glmout<-switch(specialArgs$glmcov,
+            "userID" = glm(dummyrating~userID,data=dataInDummy,family=binomial),
+            "itemID" = glm(dummyrating~itemID,data=dataInDummy,family=binomial),
+            "all" = glm(dummyrating~.,data=dataInDummy,family=binomial),
+            stop("Error: specialArgs$glmcov must be \"userID\" or \"itemID\" or \"all\"")
+        )
 
-            #add the glm model into the glm list
-            glmlist[[i]]<-glmout
-        }
+        #add the glm model into the glm list
+        glmlist[[i]]<-glmout
     }
-    #print(glmlist)
 
     #make the userlist
     userList<-droplevels(dataIn$userID)
@@ -149,27 +134,17 @@ ratingGlm <- function(dataIn,maxRating,embedMeans,specialArgs){
 #    return(dataIn)
 #}
 
-#library(lme4)
-
-#create InstEval dataset
-#ie<-InstEval
-#ie<-ie[,c(1,2,7)]
-#names(ie)<-c("userID","itemID","rating")
-
-#create songs dataset
-#songs<-read.csv("songs.csv",header=T)
-#songs[,1]<-as.factor(songs[,1])
-#songs[,2]<-as.factor(songs[,2])
-#names(songs)<-c("userID","itemID","rating")
-
 #initialize the dataset
 source("./data_loader.R")
-datasets<-load_data(is_y_last=FALSE)
-ie<-datasets[[1]][,1:3]
+datasets<-load_project_data()
+ie<-datasets[[1]]
 song<-datasets[[2]]
-sampleIndex<-sample(1:nrow(ie),100)
+sampleIndex<-sample(1:nrow(ie),300)
 ieSample<-ie[sampleIndex,]
-#print(ie)
+#ieSample<-InstEval[1:100,]
+#ieSample<-ieSample[,c(1,2,7)]
+#names(ieSample)<-c("userID","itemID","rating")
+#print(ieSample)
 
 #sa is Special Args
 sa<-list()
@@ -177,10 +152,9 @@ sa<-list()
 sa$glmcov<-"userID"
 #itemID is the covariate
 #sa$glmcov<-"itemID"
-#both userID and itemID are the covariates
-#sa$glmcov<-"all"
 
 probsFitOut <- ratingProbsFit(ieSample,5,"logit",FALSE,sa)
+#probsFitOut<-ratingProbsFit(songs,5,"logit",FALSE,)
 
 #reorder randomly the userID and itemID in dataIn
 sampleIndex<-sample(1:100,100)
@@ -191,5 +165,4 @@ itemID<-ieSample$itemID[sampleIndex]
 #make newXs. there are no new users and items
 newXs<-data.frame(userID,itemID)
 preds<-predict(probsFitOut,newXs)
-
-#ratingProbsFit(songs,5,"logit",FALSE,)
+#print(round(preds,digit=3))

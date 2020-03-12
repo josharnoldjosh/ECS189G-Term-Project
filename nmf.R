@@ -1,4 +1,4 @@
-nmfFinalModel <- function() {
+NMF<- function() {
   # So far this is only for insteval, we can also change it to accomodate song dataset
   library(recosystem)
   library(lme4)
