@@ -1,6 +1,6 @@
 source('./data_loader.R')
-source('./eval.R')
 source('./knn.R')
+source('./eval.R')
 
 # Load data
 datasets <- load_project_data()
@@ -12,7 +12,7 @@ datasets$InstEval <- embedMeans(datasets$InstEval, cache='ie')
 split <- train_test_split(datasets$InstEval)
 
 # Fit model
-output <- knn(split$train, split$test, 50)
+output <- knn(split$train, split$test, 100)
 
 # Probs
 probs <- attributes(output)$probs
@@ -26,5 +26,3 @@ score<-mape(split$test$rating, y_hat)
 
 # Print
 score
-
-

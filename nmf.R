@@ -1,58 +1,80 @@
-NMF<- function() {
-  # So far this is only for insteval, we can also change it to accomodate song dataset
+# Updates a dataframes "rating" column to be 0 or 1 based on the idx value passed to it
+extract_binary_matrix <- function(data, idx) {
+  f <- function(row) {
+    if (row[3] == idx) {
+      return (1)
+    }
+    return (0)
+  }
+  data$rating <- apply(data, 1, f)
+  return (data)
+}
+
+# Takes a dataframe and returns a list of the dataframes
+# Converted to binary matrices.
+# See "extract_binary_matrix"
+generate_binary_matrices <- function(data) {
+  f <- function(idx) {
+    return (extract_binary_matrix(data, idx))
+  }
+  
+  return (lapply(1:5, f))
+}
+
+nmf_train <- function(train, dim=50, index1=TRUE) {
   library(recosystem)
   library(lme4)
   library(Matrix)
-  data(InstEval)
-  all <- InstEval
-  
-  # TODO: Clean the data
-  all <- all[,c('s', 'd', 'y')]
-  colnames(all) <- c("Student", "Professor", "Rating")
-  nrow(all)
-  head(all)
-  
-  # Get sample size, which is 95% of all the data
-  smp_size <- floor(0.95 * nrow(all))
-  
-  # set the seed to make partition reproducible
-  set.seed(9875)
-  
-  # get the indexes of 95% of the data
-  train_ind <- sample(seq_len(nrow(all)), size = smp_size)
-  
-  # get training and test data
-  train_data <- all[train_ind, ] #95% of all data
-  test_data <- all[-train_ind, ] #5% of all data
-  
-  # TODO: need to create an object of class 'DataSource', specifying which
-  # columns are Student IDs, Professor IDs, and Ratings for training and test set
-  all.trn <- (data_memory(train_data$Student, train_data$Professor, train_data$Rating, index1 = TRUE))
-  all.tst <- (data_memory(train_data$Student, train_data$Professor, train_data$Rating, index1 = TRUE))
-  
-  #head(all.trn)
-  # recosystem package actions takes place within r
   r <- Reco()
+  train_mem <- data_memory(train$userID, train$itemID, train$rating, index1 = TRUE)
+  r$train(train_mem, opts=list(dim=dim, nmf = TRUE))
+  return (r)
+}
+
+nmf_pred <- function(r, test_mat) {
+  test <- data_memory(test_mat$userID, test_mat$itemID, test_mat$rating, index1 = TRUE)
+  preds <- r$predict(test, out_memory())
+  preds <- round(preds)
+  return (preds)
+}
+
+nmf_train_pred <- function(train, test, idx, dim=100, index1=TRUE) {
+  train_mats <- generate_binary_matrices(train)
+  test_mats <- generate_binary_matrices(test)
+  model <- nmf_train(train_mats[[idx]], dim, index1)
+  preds <- nmf_pred(model, test_mats[[idx]])
+  return (preds)
+}
+
+# Convert binary output to "votes"
+get_votes_from_nmf_output <- function(results) {
+  vote_mult <- t(replicate(dim(results)[1], c(1, 2, 3, 4, 5)))
+  results <- results*vote_mult
+  return (results)
+}
+
+# Train all the NMFs
+train_all <- function(train, test, dim, index1) {
+  f <- function(idx) {
+    return (nmf_train_pred(train, test, idx, dim, index1))
+  }
+  preds<-lapply(1:5, f)
+  df <- data.frame(Reduce(cbind, preds))
+  names(df) <- c("1", "2", "3", "4", "5")
+  return (df)
+}
+
+# Given a train and a test dataset, will return a vector of votes
+nmf <- function(train, test, dim=100, index1 = TRUE) {
+  # Train Nmfs
+  df <- train_all(train, test, dim, index1)
   
-  # TODO: do the factorization, with rank ...; do use NMF
-  r$train(all.trn, opts=list(dim=50, nmf = TRUE))
+  # Get votes
+  df <- get_votes_from_nmf_output(df)
   
-  # COMMENTED OUT CODE PURPOSE: Get the W and H matrix and save it
-  # result <- r$output(out_memory(), out_memory())
+  # Get probs
+  probs <- votes_to_prob(df)
   
-  # W <- result$P
-  # H <- t(result$Q)
-  
-  # Save W and H into expected file
-  # save(W, H, file = "WH.RData")
-  
-  # W and H matrices are here
-  #WH <- load(InstEval)
-  
-  # Returns a predict.txt file with all 5000 predictions
-  preds <- r$predict(all.tst, out_memory())
-  print(preds)
-  # Calculate MAPE - returns NaN
-  # mape <- mean(abs((test_data$rating - preds) / test_data$rating)) * 100
-  # cat("Mean Absolute Percentage Error:", mape, "\n")
+  # Return
+  return(probs)
 }
