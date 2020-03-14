@@ -89,7 +89,6 @@ ratingGlm <- function(dataIn,maxRating,embedMeans,specialArgs){
         glmout<-switch(specialArgs$glmcov,
             "userID" = glm(dummyrating~userID,data=dataInDummy,family=binomial),
             "itemID" = glm(dummyrating~itemID,data=dataInDummy,family=binomial),
-            "all" = glm(dummyrating~.,data=dataInDummy,family=binomial),
             stop("Error: specialArgs$glmcov must be \"userID\" or \"itemID\" or \"all\"")
         )
 
