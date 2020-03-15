@@ -9,7 +9,7 @@ datasets <- load_project_data()
 split <- train_test_split(datasets$InstEval)
 
 # Get output from nmf
-result <- nmf(split$train, split$test, dim = 100, bias=0.4, forest_size=10)
+result <- nmf(split$train, split$test, dim = 100, bias=0.5, forest_size=3)
 
 # View output
 head(result)

@@ -68,6 +68,10 @@ train_all <- function(train, test, dim, bias, forest_size, index1) {
 # Given a train and a test dataset, will return a vector of votes
 nmf <- function(train, test, dim=100, bias=0, forest_size=0, index1 = TRUE) {
   
+  if (bias < 0 || bias > 0.5) {
+    bias = 0
+  }
+  
   # Train nmfs
   df <- train_all(train, test, dim, bias, index1)
   if (forest_size > 0) {
