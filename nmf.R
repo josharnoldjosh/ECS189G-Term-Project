@@ -21,6 +21,7 @@ generate_binary_matrices <- function(data) {
   return (lapply(1:5, f))
 }
 
+# Helper functions for training & predicting with NMF
 nmf_train <- function(train, dim=50, index1=TRUE) {
   library(recosystem)
   library(lme4)
@@ -30,7 +31,6 @@ nmf_train <- function(train, dim=50, index1=TRUE) {
   r$train(train_mem, opts=list(dim=dim, nmf = TRUE))
   return (r)
 }
-
 nmf_pred <- function(r, test_mat, bias=0) {
   test <- data_memory(test_mat$userID, test_mat$itemID, test_mat$rating, index1 = TRUE)
   preds <- r$predict(test, out_memory())
@@ -38,7 +38,6 @@ nmf_pred <- function(r, test_mat, bias=0) {
   preds <- round(preds)
   return (preds)
 }
-
 nmf_train_pred <- function(train, test, idx, dim=100, bias=0, index1=TRUE) {
   train_mats <- generate_binary_matrices(train)
   test_mats <- generate_binary_matrices(test)
@@ -65,7 +64,12 @@ train_all <- function(train, test, dim, bias, forest_size, index1) {
   return (df)
 }
 
-# Given a train and a test dataset, will return a vector of votes
+# Our main function
+# Given train and test data, will output probabilities
+# Dim specifies the latent space
+# Bias specifies whether we're more likely to have more votes (less confident)
+# Forest size specifies more predictions to average out the error but more computation time
+# index1 specifies whether or not our datasets start from 1 or 0 with the user and item ID's
 nmf <- function(train, test, dim=100, bias=0, forest_size=0, index1 = TRUE) {
   
   if (bias < 0 || bias > 0.5) {
