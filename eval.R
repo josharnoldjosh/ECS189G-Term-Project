@@ -39,7 +39,7 @@ votes_to_prob <- function(votes) {
   result<-apply(votes, 1, get_probs)
   result <- t(result)
   
-  result[is.na(result)] <- 0.2
+  result[is.na(result)] <- 0
   
   return(result)
 }

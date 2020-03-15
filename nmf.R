@@ -31,32 +31,33 @@ nmf_train <- function(train, dim=50, index1=TRUE) {
   return (r)
 }
 
-nmf_pred <- function(r, test_mat) {
+nmf_pred <- function(r, test_mat, bias=0) {
   test <- data_memory(test_mat$userID, test_mat$itemID, test_mat$rating, index1 = TRUE)
   preds <- r$predict(test, out_memory())
+  preds <- preds + bias
   preds <- round(preds)
   return (preds)
 }
 
-nmf_train_pred <- function(train, test, idx, dim=100, index1=TRUE) {
+nmf_train_pred <- function(train, test, idx, dim=100, bias=0, index1=TRUE) {
   train_mats <- generate_binary_matrices(train)
   test_mats <- generate_binary_matrices(test)
   model <- nmf_train(train_mats[[idx]], dim, index1)
-  preds <- nmf_pred(model, test_mats[[idx]])
+  preds <- nmf_pred(model, test_mats[[idx]], bias)
   return (preds)
 }
 
 # Convert binary output to "votes"
-get_votes_from_nmf_output <- function(results) {
-  vote_mult <- t(replicate(dim(results)[1], c(1, 2, 3, 4, 5)))
+get_votes_from_nmf_output <- function(results, forest_size) {
+  vote_mult <- t(replicate(dim(results)[1], rep(c(1, 2, 3, 4, 5), forest_size)))
   results <- results*vote_mult
   return (results)
 }
 
 # Train all the NMFs
-train_all <- function(train, test, dim, index1) {
+train_all <- function(train, test, dim, bias, forest_size, index1) {
   f <- function(idx) {
-    return (nmf_train_pred(train, test, idx, dim, index1))
+    return (nmf_train_pred(train, test, idx, dim, bias, index1))
   }
   preds<-lapply(1:5, f)
   df <- data.frame(Reduce(cbind, preds))
@@ -65,12 +66,18 @@ train_all <- function(train, test, dim, index1) {
 }
 
 # Given a train and a test dataset, will return a vector of votes
-nmf <- function(train, test, dim=100, index1 = TRUE) {
-  # Train Nmfs
-  df <- train_all(train, test, dim, index1)
+nmf <- function(train, test, dim=100, bias=0, forest_size=0, index1 = TRUE) {
   
+  # Train nmfs
+  df <- train_all(train, test, dim, bias, index1)
+  if (forest_size > 0) {
+    for (i in 1:forest_size) {  
+      df <- cbind(df, train_all(train, test, dim, bias, index1))
+    }
+  }
+
   # Get votes
-  df <- get_votes_from_nmf_output(df)
+  df <- get_votes_from_nmf_output(df, forest_size)
   
   # Get probs
   probs <- votes_to_prob(df)
