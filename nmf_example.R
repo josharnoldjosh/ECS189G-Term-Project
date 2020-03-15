@@ -13,3 +13,10 @@ result <- nmf(split$train, split$test, dim = 100, bias=0.3, forest_size=3)
 
 # View output
 head(result)
+
+#############################
+#       Tune the data       #
+#############################
+
+nmf_tune(datasets$InstEval, 'InstEval')
+nmf_tune(datasets$SongList, 'SongList')
