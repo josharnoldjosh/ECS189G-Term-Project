@@ -24,8 +24,8 @@ newXs<-data.frame(userID,itemID)
 
 
 #CART
-#probsFitOutCART<-ratingProbsFit(ie,5,"CART",FALSE,NULL)
-#predsCART<-predict(probsFitOutCART,newXs)
+probsFitOutCART<-ratingProbsFit(ie,5,"CART",TRUE,NULL)
+predsCART<-predict(probsFitOutCART,newXs)
 
 
 #Logit

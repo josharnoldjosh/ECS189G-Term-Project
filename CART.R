@@ -82,6 +82,17 @@ ratingCART <- function(dataIn,maxRating,embedMeans,specialArgs) {
   if(embedMeans){
     
     embedData<-ratingEmbed(dataIn, maxRating)
+    rplist<-as.list(NULL)
+    for(i in 1:maxRating){
+      inputdata<-data.frame(embedData[,1],embedData[,i+1])
+      names(inputdata)<-c("userID","embedProb")
+      rpout<-rpart(embedProb~userID,data=inputdata,method="anova",control=rpart.control(minsplit=10,cp=0.001))
+      #prune the tree
+      #prunedrpout<-prune(rpout,cp=rpout$cptable[which.min(rpout$cptable[,4]),1])
+      
+      #rplist[[i]]<-prunedrpout
+      rplist[[i]]<-rpout
+    }
     
     
   }else{
@@ -120,19 +131,26 @@ ratingEmbed <- function(dataIn,maxRating){
     
     #call formUserData
     fud<-formUserData(dataIn)
-
+    
     #make the userID column
     userID<-c(1:length(fud))
     userID<-as.factor(userID)
 
-    #make the meanRating column
-    meanRating<-c()
+    #make the probability column
+    probs<-NULL
     for(i in 1:length(fud)){
-        meanRating<-c(meanRating,mean(fud[[i]]$ratings))
+      row<-c()
+      for(j in 1:maxRating){
+        prob<-sum(fud[[i]]$rating==j)/length(fud[[i]]$rating)
+        row<-c(row,prob)
+      }
+      probs<-rbind(probs,row)
    }
 
     #make the embedded dataframe
-    dataIn<-data.frame(userID,meanRating)
+    dataIn<-data.frame(userID,probs)
+    colnames(dataIn)<-c("userID",1:maxRating)
+    rownames(dataIn)<-c()
     return(dataIn)
 }
 
