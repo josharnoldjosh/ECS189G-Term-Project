@@ -164,5 +164,9 @@ embed_test_from_train <- function(train, cache, test) {
   test$userID <- lapply(test$userID, f_user_id)
   test$itemID <- lapply(test$itemID, f_item_id)
   
+  # Ensure test is appropriate
+  test$userID <- as.numeric(test$userID)
+  test$itemID <- as.numeric(test$itemID)
+  
   return (list(train=train_embed, test=test))
 }

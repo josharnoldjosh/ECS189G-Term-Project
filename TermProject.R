@@ -8,6 +8,7 @@ ratingProbsFit <- function(dataIn,maxRating,predMethod,embedMeans,specialArgs){
     source("./CART.R")
     source("./glm.R")
     source("./knn.R")
+    source("./nmf.R")
     source("./eval.R")
 
     # Load library
@@ -40,7 +41,7 @@ ratingProbsFit <- function(dataIn,maxRating,predMethod,embedMeans,specialArgs){
     #create a recProbs object based on the predMethod
     probsFitOut<-switch(predMethod,
       "logit" = ratingGlm(dataIn,maxRating,embedMeans,specialArgs),
-      "NMF" = print("NMF called"),
+      "NMF" = ratingNMF(dataIn, specialArgs),
       "kNN" = rating_kNN(dataIn, specialArgs),
       "CART" = ratingCART(dataIn,maxRating,embedMeans,specialArgs),
       stop("Error: predMethod is incorrect")
@@ -70,7 +71,7 @@ predict.recProbs <- function(probsFitOut, newXs){
     #calculate the probability matrix
     preds<-switch(probsFitOut$predMethod,
       "logit" = logitPredict(probsFitOut,newXs),
-      "NMF" = print("NMF predict"),
+      "NMF" = NMFPredict(probsFitOut, newXs),
       "kNN" = kNN_predict(probsFitOut, newXs),
       "CART" = CARTPredict(probsFitOut,newXs),
       stop("Error: predMethod is incorrect")

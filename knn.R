@@ -69,10 +69,6 @@ kNN_predict <- function (probsFitOut, newXs) {
   train <- result[["train"]]
   test <- result[["test"]]
   
-  # Ensure test is appropriate
-  test$userID <- as.numeric(test$userID)
-  test$itemID <- as.numeric(test$itemID)
-
   # Parameters
   nc <- as.numeric(probsFitOut[["nc"]])
   

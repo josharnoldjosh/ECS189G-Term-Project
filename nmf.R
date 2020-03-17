@@ -1,6 +1,10 @@
 # Updates a dataframes "rating" column to be 0 or 1 based on the idx value passed to it
 extract_binary_matrix <- function(data, idx) {
   f <- function(row) {
+    if (is.na(row[3])) {
+      return (NA)
+    }
+    
     if (row[3] == idx) {
       return (1)
     }
@@ -88,7 +92,7 @@ nmf <- function(train, test, dim=100, bias=0, forest_size=0, index1 = TRUE) {
   df <- get_votes_from_nmf_output(df, forest_size)
   
   # Get probs
-  probs <- votes_to_prob(df)
+  probs <- votes_to_prob(df, replace_na=0.2)
   
   # Return
   return(probs)
@@ -116,4 +120,53 @@ nmf_tune <- function(data, ext='nmf') {
   save(nmf_ops, file = paste("tune/",ext, ".RData", sep=""))
   
   return (nmf_ops)
+}
+
+ratingNMF <- function (train, specialArgs) {
+  
+  # Load Special Args
+  if (is.null(specialArgs[["dim"]])) {
+    dim <- 100
+  }else{
+    dim <- specialArgs[["dim"]]
+  }
+  if (is.null(specialArgs[["bias"]])) {
+    bias <- 0.3
+  }else{
+    bias <- specialArgs[["bias"]]
+  }
+  if (is.null(specialArgs[["forest_size"]])) {
+    forest_size <- 3
+  }else{
+    forest_size <- specialArgs[["forest_size"]]
+  }
+  
+  probsFitOut<-list(
+      predMethod = "NMF",
+      train_data = train,
+      userList=train$userID,
+      itemList=train$itemID,
+      dim=dim,
+      bias=bias,
+      forest_size=forest_size
+    )
+  
+  class(probsFitOut)<-"recProbs"
+  
+  return (probsFitOut)
+}
+
+NMFPredict <- function (probsFitOut, newXs) {
+  train <- probsFitOut[["train_data"]]
+  
+  # For test, we need to add "space" for the ratings to be predicted
+  # We do not know the ratings for newXs, so we put NA
+  test <- newXs
+  test$rating <- rep(NA, nrow(test))
+  
+  dim <- probsFitOut[["dim"]]
+  bias <- probsFitOut[["bias"]]
+  forest_size <- probsFitOut[["forest_size"]]
+  result <- nmf(train, test, dim = dim, bias=bias, forest_size=forest_size)
+  return (result)
 }

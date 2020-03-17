@@ -2,7 +2,7 @@ mape <- function(y, y_hat) {
   return (mean(abs(y-y_hat)))
 }
 
-votes_to_prob <- function(votes) {
+votes_to_prob <- function(votes, replace_na=0) {
   
   get_counts <- function(row) {
     default<-cbind(
@@ -39,7 +39,8 @@ votes_to_prob <- function(votes) {
   result<-apply(votes, 1, get_probs)
   result <- t(result)
   
-  result[is.na(result)] <- 0
+  # Temp
+  result[is.na(result)] <- replace_na
   
   return(result)
 }
