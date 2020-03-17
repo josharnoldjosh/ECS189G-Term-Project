@@ -141,3 +141,28 @@ k_fold <- function(data, i, k=10) {
   result$test <- testData
   return (result)
 }
+
+
+# We embed the train dataset
+# Then use the test set to map the embedding from the train set to the test set
+# Because we want to use the same embedding for the train for the test set
+embed_test_from_train <- function(train, cache, test) {
+  train_embed <- embedMeans(train, cache=cache)
+  
+  f_user_id <- function(userID) {
+    user_idx <- which(userID == train$userID)[[1]]
+    new_user_id <- train_embed[user_idx, ][[1]]
+    return (new_user_id)    
+  }
+  
+  f_item_id <- function(itemID) {
+    item_idx <- which(itemID == train$itemID)[[1]]
+    new_item_id <- train_embed[item_idx, ][[2]]
+    return (new_item_id)    
+  }
+  
+  test$userID <- lapply(test$userID, f_user_id)
+  test$itemID <- lapply(test$itemID, f_item_id)
+  
+  return (list(train=train_embed, test=test))
+}

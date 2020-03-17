@@ -10,10 +10,13 @@ ratingProbsFit <- function(dataIn,maxRating,predMethod,embedMeans,specialArgs){
     source("./knn.R")
     source("./eval.R")
 
-    #load library
+    # Load library
     library(rectools)
+  
+    # Use our LoadData function
+    dataIn <- load_data(dataIn)
 
-    #check if the dataIn is correct or not
+    # Check if the dataIn is correct or not
     if(length(dataIn) != 3){
         stop("Error: dataIn must have 3 columns")
     }
@@ -36,21 +39,26 @@ ratingProbsFit <- function(dataIn,maxRating,predMethod,embedMeans,specialArgs){
 
     #create a recProbs object based on the predMethod
     probsFitOut<-switch(predMethod,
-    "logit" = ratingGlm(dataIn,maxRating,embedMeans,specialArgs),
-    "NMF" = print("NMF called"),
-    "kNN" = print("kNN called"),
-    "CART" = ratingCART(dataIn,maxRating,embedMeans,specialArgs),
-    stop("Error: predMethod is incorrect")
+      "logit" = ratingGlm(dataIn,maxRating,embedMeans,specialArgs),
+      "NMF" = print("NMF called"),
+      "kNN" = rating_kNN(dataIn, specialArgs),
+      "CART" = ratingCART(dataIn,maxRating,embedMeans,specialArgs),
+      stop("Error: predMethod is incorrect")
     )
 
     #return the recProbs object
     return(probsFitOut)
-
 }
 
 #predict the probabilities from a recProbs object
 #the test data is not allowed to have any new users and items
-predict.recProbs <- function(probsFitOut,newXs){
+predict.recProbs <- function(probsFitOut, newXs){
+  
+    #read the predMethods files
+    source("./CART.R")
+    source("./glm.R")
+    source("./knn.R")
+    source("./eval.R")
 
     #check if there are new users or items
     newUser<-setdiff(newXs$userID,probsFitOut$userList)
@@ -61,11 +69,11 @@ predict.recProbs <- function(probsFitOut,newXs){
 
     #calculate the probability matrix
     preds<-switch(probsFitOut$predMethod,
-    "logit" = logitPredict(probsFitOut,newXs),
-    "NMF" = print("NMF predict"),
-    "kNN" = print("kNN predict"),
-    "CART" = CARTPredict(probsFitOut,newXs),
-    stop("Error: predMethod is incorrect")
+      "logit" = logitPredict(probsFitOut,newXs),
+      "NMF" = print("NMF predict"),
+      "kNN" = kNN_predict(probsFitOut, newXs),
+      "CART" = CARTPredict(probsFitOut,newXs),
+      stop("Error: predMethod is incorrect")
     )
 
     #return the probability matrix

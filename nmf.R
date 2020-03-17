@@ -101,9 +101,9 @@ nmf_tune <- function(data, ext='nmf') {
   train_data <- data_memory(data$userID, data$itemID, data$rating, index1 = TRUE)
   r = Reco()
   
-  to_search <- seq(from = 0.05, to = 0.5, by = 0.05)
+  to_search <- c(0.01, 0.1)
   
-  result <- r$tune(train_data, opts = list(dim      = c(10L, 20L, 30L, 40L, 50L, 60L, 70L, 80L, 90L, 100L, 150L, 200L, 250L, 300L, 350L, 400L, 450L, 500L,600L, 700L, 800L, 900L, 1000L),
+  result <- r$tune(train_data, opts = list(dim      = c(10L, 100L,250L, 500L),
                                            costp_l1 = to_search,
                                            costp_l2 = to_search,
                                            costq_l1 = to_search,
@@ -111,7 +111,6 @@ nmf_tune <- function(data, ext='nmf') {
                                            lrate    = to_search)
                                           )
   nmf_ops <- result$min
-  
   
   # Save
   save(nmf_ops, file = paste("tune/",ext, ".RData", sep=""))

@@ -18,5 +18,5 @@ head(result)
 #       Tune the data       #
 #############################
 
-nmf_tune(datasets$InstEval, 'InstEval')
-nmf_tune(datasets$SongList, 'SongList')
+#nmf_tune(datasets$InstEval, 'InstEval')
+nmf_tune(datasets$SongList, 'SongList') # Run me before bed
