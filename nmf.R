@@ -76,8 +76,11 @@ train_all <- function(train, test, dim, bias, forest_size, index1) {
 # index1 specifies whether or not our datasets start from 1 or 0 with the user and item ID's
 nmf <- function(train, test, dim=100, bias=0, forest_size=0, index1 = TRUE) {
   
-  if (bias < 0 || bias > 0.5) {
+  # Bias
+  if (bias < 0) {
     bias = 0
+  }else if (bias > 0.45) {
+    bias <- 0.45
   }
   
   # Train nmfs
