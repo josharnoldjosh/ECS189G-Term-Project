@@ -17,9 +17,10 @@ itemID<-ie$itemID[sampleIndex]
 newXs<-data.frame(userID,itemID)
 
 ################################################################################################
+#Below are an example to call the ratingProbsFit and its prediction function
 
 #CART
-probsFitOutCART<-ratingProbsFit(ie, 5, "CART", TRUE, NULL)
+probsFitOutCART<-ratingProbsFit(ie, 5, "CART", FALSE, NULL)
 predsCART<-predict(probsFitOutCART,newXs)
 head(predsCART)
 
@@ -38,7 +39,10 @@ probsFitOutNMF<-ratingProbsFit(ie, 5, "NMF", TRUE, list(dim=100, bias=0.375, for
 predsNMF<-predict(probsFitOutNMF, newXs)
 head(predsNMF)
 
-# Add Logit
-# ...
+# Logit
+# Glmcov: this argument is "userID" or "itemID". User select which column to use as a covariate
+probsFitOutLogit<-ratingProbsFit(ie, 5, "logit", FALSE, list(glmcov="userID"))
+predsLogit<-predict(probsFitOutLogit, newXs)
+head(predsLogit)
 
 ################################################################################################
