@@ -2,9 +2,11 @@
 #and plot the graph
 
 #read the functions
-source("CART.R")
+source("test_cart.R")
 source("data_loader.R")
 source("eval.R")
+library(rectools)
+library(ggplot2)
 
 #initialize the dataset
 datasets<-load_project_data()
@@ -42,12 +44,34 @@ for(i in 1:10){
   songKfDataList[[i]]<-songkf
 }
 
-#do the k fold cross validation
-for(i in 1:10){
-  print(i)
-  #train the model
-  probsFitOut<-ratingProbsFit(songKfDataList[[i]]$train,5,"CART",FALSE,NULL)
-  #test the model
-  preds<-predict(probsFitOut,songKfDataList[[i]]$test)
-  #calculate the mape
+result<-NULL
+for(j in 1:10){
+  sa<-list()
+  sa$minsplit<-2^j
+  #do the k fold cross validation
+  mp<-0
+  for(i in 1:10){
+    print(i)
+    #train the model
+    probsFitOut<-ratingProbsFit(songKfDataList[[i]]$train,5,"CART",FALSE,sa)
+    #test the model
+    preds<-predict(probsFitOut,songKfDataList[[i]]$test)
+    preds[,2]<-preds[,2]*2
+    preds[,3]<-preds[,3]*3
+    preds[,4]<-preds[,4]*4
+    preds[,5]<-preds[,5]*5
+    rating_preds<-apply(preds,1,sum)
+    names(rating_preds)<-NULL
+    #calculate the mape
+    mp<-mp + mape(ieKfDataList[[i]]$test$rating,rating_preds)
+    print(mp)
+  }
+  mp<- mp/10
+  print(mp)
+  result_row<-c(sa$minsplit,mp)
+  result<-rbind(result,result_row)
 }
+print(result)
+result<-data.frame(result)
+rownames(result)<-NULL
+colnames(result)<-c("minsplit","MAPE")
