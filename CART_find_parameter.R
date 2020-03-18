@@ -53,9 +53,9 @@ for(j in 1:10){
   for(i in 1:10){
     print(i)
     #train the model
-    probsFitOut<-ratingProbsFit(songKfDataList[[i]]$train,5,"CART",FALSE,sa)
+    probsFitOut<-ratingProbsFit(ieKfDataList[[i]]$train,5,"CART",FALSE,sa)
     #test the model
-    preds<-predict(probsFitOut,songKfDataList[[i]]$test)
+    preds<-predict(probsFitOut,ieKfDataList[[i]]$test)
     preds[,2]<-preds[,2]*2
     preds[,3]<-preds[,3]*3
     preds[,4]<-preds[,4]*4
