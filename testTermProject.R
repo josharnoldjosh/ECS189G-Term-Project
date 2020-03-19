@@ -49,17 +49,17 @@ head(predsCART)
 # kNN
 # Cache : a necessary parameter, a unique name for the dataset you are using
 # NC : the number of clusters to use for the KNN. 100 seems to be the best
-#probsFitOutKNN<-ratingProbsFit(ietrain, 5, "kNN", TRUE, list(cache="ie", nc=100))
-#predsKNN<-predict(probsFitOutKNN, ietest)
-#predsKNN<-probs_to_rating(predsKNN)
-#mapeKNN<-mape(ietest$rating,predsKNN)
-#head(predsKNN)
+probsFitOutKNN<-ratingProbsFit(ietrain, 5, "kNN", TRUE, list(cache="ie", nc=100))
+predsKNN<-predict(probsFitOutKNN, ietest)
+predsKNN<-probs_to_rating(predsKNN)
+mapeKNN<-mape(ietest$rating,predsKNN)
+head(predsKNN)
 
 # NFM
 # Dim : Latent space for NMF
 # Bias : A value between 0 and 0.5 | The threshold for "considering" a vote
 # Forest size : How many "forests" of NMF's to create. The higher the number, the more fine-grained the probabilities will be 
-probsFitOutNMF<-ratingProbsFit(ietrain, 5, "NMF", TRUE, list(dim=100, bias=0.375, forest_size=3)) # May take like 3 minutes to compute
+probsFitOutNMF<-ratingProbsFit(ietrain, 5, "NMF", TRUE, list(dim=100, bias=0.1, forest_size=4)) # May take like 3 minutes to compute
 predsNMF<-predict(probsFitOutNMF, ietest)
 predsNMF<-probs_to_rating(predsNMF)
 mapeNMF<-mape(ietest$rating,predsNMF)
@@ -74,3 +74,9 @@ mapeLogit<-mape(ietest$rating,predsLogit)
 head(predsLogit)
 
 ################################################################################################
+
+mapeKNN
+mapeCART
+mapeNMF
+mapeLogit
+
